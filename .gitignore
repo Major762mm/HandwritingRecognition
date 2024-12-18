@@ -1,6 +1,7 @@
 # Ignorar tudo, exceto a pasta desejada
 
 !Embedding/
+!README.md
 Copias/
 fornecedores.db
 log_lancamentos_*.json
