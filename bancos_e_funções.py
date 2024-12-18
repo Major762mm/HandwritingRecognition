@@ -556,7 +556,8 @@ bancos = {
             119:	("WESTERN UNION DO BRASIL S.A.", None),
             124:	("WOORI BANK DO BRASIL S.A", None),
             136:	("Unicred", None),
-            0:      ("Conta - Agua/Luz", None)
+            0:      ("Conta - Agua/Luz", None),
+            461:    ("Asaas", None)
     } 
 
 

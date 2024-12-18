@@ -11,6 +11,7 @@ import sqlite3
 import logging
 import json
 from datetime import datetime
+import pynput
 #from Copias/copia_banco import bancos
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
@@ -25,6 +26,9 @@ class Bot(DesktopBot):
             self.monitorando_teclas = True
             threading.Thread(target=self.monitorar_teclas, daemon=True).start()
             self.dados_lancamento = []
+            #self.coletando_log = False
+            #self.log_atual = {"valor": "", "NFe": "", "vencimento": ""}  # Inicializa campos vazios
+            #self.campo_atual = "valor"  # Define qual campo está sendo preenchido
         self.db = FornecedorDB("fornecedores.db")
         #self.db.criar_banco()
 
@@ -349,7 +353,6 @@ class Bot(DesktopBot):
                 conn.close()
  
     def executar_automacao(self):
-        #self.logs()
         print("Iniciando nova iteração do loop.")
         self.wait(2000)
         self.click_at(1003, 114)
@@ -364,8 +367,14 @@ class Bot(DesktopBot):
             self.calculadora()
         else:
             self.comportamento_para_nao()
-            # Clique no campo e aguarda o texto ser inserido        
+            # Clique no campo e aguarda o texto ser inserido
+            
+        #listener = self._monitorar_teclado()
+        #self.logs("iniciar")
+        #self._monitorar_teclado()
         self.aguardar_tecla_insert("Etapa 1")  # Aguarda tecla Insert
+        #self.logs("finalizar")
+        #listener.stop()
         print("Esperando após digitar o Valor.")
         #self.notificar("Esperando", "Após digitar o valor")
         # Aguardar digitação de texto e Insert para a "Categoria"
@@ -385,7 +394,7 @@ class Bot(DesktopBot):
                 print("Nenhum dado disponível para preencher a categoria.")
         except Exception as e:
             print(f"Erro ao preencher a categoria: {e}")
-
+        #self.logs()
 
         time.sleep(0.25)
         #self.aguardar_tecla_insert("Etapa 2")
@@ -406,6 +415,7 @@ class Bot(DesktopBot):
         # NFe e próxima etapa
         self.aguardar_digitar("Numero NFe")
         self.aguardar_tecla_insert("Etapa 4")
+        #self.logs()
         print("Esperando após digitar a NFe.")
         self.notificar("Esperando", "Após digitar o NFe")
         # Continuar navegação com Tab
@@ -416,6 +426,7 @@ class Bot(DesktopBot):
         keyboard.write(str(self.fornecedor))
         self.wait(0.50)
         self.double_click_at(1544, 538)
+        #self.logs()
         #self.aguardar_tecla_insert("Etapa 5")
         print("Esperando após digitar o Fornecedor.")
         self.notificar("Esperando", "Após digitar o Fornecedor")
@@ -445,6 +456,7 @@ class Bot(DesktopBot):
         # Vencimento e aguardar tecla Insert
         self.aguardar_digitar("Vencimento")
         self.aguardar_tecla_insert("Etapa 8")
+        #self.logs()
         print("Esperando após digitar o Vencimento.")
         self.notificar("Esperando", "Após digitar o Vencimento")
         self.pular_campos(2)
@@ -834,33 +846,44 @@ class Bot(DesktopBot):
     def not_found(self, numero):
         print(f"Elemento '{numero}' não encontrado. Verifique a imagem ou a configuração.")
 
-    def logs(self):        
-        dados = {
-            "valor": None,
-            "categoria": self.categoria,
-            "NFe": None,
-            "fornecedor": self.fornecedor,
-            "parcelas": self.parcelas,
-            "metodo_pagamento": "BOLETO",
-            "banco": self.codigo_banco,
-            "periodicidade": "Mensal",
-            "vencimento": None,
-        }
-
-        # Simulação de cada etapa com coleta de dados
-        print("Preenchendo valor...")
-        valor = input("Digite o valor: ")  # Simula inserção manual
-        dados["valor"] = valor
-
-        print("Preenchendo NFe...")
-        nfe = input("Digite o número da NFe: ")  # Simula inserção manual
-        dados["NFe"] = nfe
-
-        print("Preenchendo vencimento...")
-        vencimento = input("Digite a data de vencimento (DD/MM/AAAA): ")  # Simula inserção manual
-        dados["vencimento"] = vencimento
-
-        self.dados_lancamento.append(dados)  # Adiciona os dados do lançamento atual
+    #def logs(self, etapa):
+    #    """
+    #    Ativa ou finaliza a coleta de logs com base na etapa fornecida.
+    #    """
+    #    if etapa == "iniciar":
+    #        print("Coleta de logs iniciada.")
+    #        self.coletando_log = True
+    #    elif etapa == "finalizar":
+    #        print("Coleta de logs finalizada.")
+    #        self.coletando_log = False
+    #        self.dados_lancamento.append(self.log_atual.copy())  # Armazena o log
+    #        print("Dados coletados:", self.log_atual)
+    #        self.log_atual = {"valor": "", "NFe": "", "vencimento": ""}  # Reseta o log atual
+#
+    #def _monitorar_teclado(self):
+    #    """
+    #    Monitora teclas pressionadas enquanto a coleta de logs está ativa.
+    #    """
+    #    def on_press(key):
+    #        if not self.coletando_log:
+    #            return  # Não registra nada se a coleta não está ativa
+#
+    #        try:
+    #            # Captura teclas alfanuméricas
+    #            if hasattr(key, 'char') and key.char:
+    #                self.log_atual[self.campo_atual] += key.char  # Adiciona à string atual
+    #            # Lida com teclas especiais como backspace
+    #            elif key == pynput.keyboard.Key.backspace:
+    #                self.log_atual[self.campo_atual] = self.log_atual[self.campo_atual][:-1]
+    #            # Depuração para exibir o valor atual do campo
+    #            print(f"{self.campo_atual}: {self.log_atual[self.campo_atual]}")
+    #        except Exception as e:
+    #            print(f"Erro ao capturar tecla: {e}")
+#
+    #    # Inicia o monitoramento do teclado em um ouvinte separado
+    #    listener = pynput.keyboard.Listener(on_press=on_press)
+    #    listener.start()
+    #    return listener
 
     def lancamentos(self):
         while True:
