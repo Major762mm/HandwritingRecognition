@@ -6,15 +6,7 @@ import keyboard
 from plyer import notification  # Para enviar notificações
 import time
 import threading
-from bancos_e_funções import FornecedorDB, bancos
-import sqlite3
-import logging
-import json
-from datetime import datetime
-#from Copias/copia_banco import bancos
-
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(message)s')
-logging.info("Categoria adicionada com sucesso")
+from bancos_e_funções import bancos, fornecedores
 
 
 class Bot(DesktopBot):
@@ -24,17 +16,31 @@ class Bot(DesktopBot):
         if not hasattr(self, 'monitorando_teclas'):
             self.monitorando_teclas = True
             threading.Thread(target=self.monitorar_teclas, daemon=True).start()
-            self.dados_lancamento = []
-        self.db = FornecedorDB("fornecedores.db")
-        #self.db.criar_banco()
-
-    
-        self.alterar_valor = {
-            1: ("Não"),
-            2: ("Sim")
-        }
         
-        self.calculadora_ask = {
+        
+        # Inicializando 'self.categorias' dentro do método action
+        self.categorias = { 
+            1: ("Manutenção de Veiculos", None),
+            2: ("Manutenção e conservação predial", "4.2.3.19"),
+            3: ("Manutenção de maquinas", "4.2.3.28"),
+            4: ("Peças corretivas", "4.2.3.17.2.1"),
+            5: ("Peças preventivas", "4.2.3.17.1.1"),
+            6: ("Combustivel e lubrificantes", "4.2.3.21"),
+            7: ("Aluguéis", "4.2.3.10"),
+            8: ("Energia", "4.2.3.11"),
+            9: ("Agua e esgoto", "4.2.3.12"),
+            10: ("Material limpeza", None),
+            11: ("Serviços de terceiros", "4.2.3.20"),
+            12: ("Taxas", "4.2.3.23"),
+            13: ("Despesas com refeitorio - Matriz", "4.2.3.37"),
+            14: ("Material escritorio", "4.2.3.15"),
+            15: ("Despesas com Alimentação - Curitiba", "4.2.9.15"),
+            16: ("Telefones", "4.2.3.13")
+            
+            }
+
+
+        self.alterar_valor = {
             1: ("Não"),
             2: ("Sim")
         }
@@ -45,206 +51,88 @@ class Bot(DesktopBot):
         self.nome_banco = None
         self.alterar = None
         self.escolha = None
-        self.calculadora_ask = None
         
         self.iniciar()
         
     def iniciar(self):
         while True:
-            self.click_at(607, 1062)
-            self.wait(1)
-            self.click_at(607, 1062)
-            print("\nMenu Principal:")
-            print("1: Adicionar Categoria")
-            print("2: Adicionar Fornecedor")
-            print("3: Fazer lançamento")
-            print("4: Esquema com boletos")
-            print("5: Excluir categoria")
-            print("6: Listar categorias")
-            print("7: Listar fornecedores")
-            print("8: Editar categoria")
-            print("9: Editar fornecedor")
-            print("0: Sair")
-    
-            escolha = input("Escolha uma opção: ")
+            self.categoria = None
+            self.parcelas = 1
+            self.banco = None
+            self.nome_banco = None
+            self.alterar = None
+            self.escolha = None
             
-            if escolha == "1":
-                self.adicionar_categoria()
-            elif escolha == "2":
-                self.adicionar_fornecedor()
-            elif escolha == "3":
-                self.lancamentos()
-            elif escolha == "4":
-                print("Sem função...")
-            elif escolha == "5":
-                self.excluir_categoria()
-            elif escolha == "6":
-                self.db.listar_categorias()
-            elif escolha == "7":
-                self.db.listar_fornecedores()
-            elif escolha == "8":
-                self.db.editar_categoria()
-            elif escolha == "9":
-                self.db.editar_fornecedor()
-            elif escolha == "0":
-                print("Encerrando...")
-                break
-            else:
-                print("Opção inválida. Tente novamente.")
+            print("Iniciando novo processo de automação.")
+
+
+            # Selecionar categoria e parcelas
+            self.selecionar_categoria()
+
+            # Selecionar banco para o lançamento
+            self.selecionar_banco()
+
+            # Escolher se deseja alterar o valor baseado no número de parcelas
+            self.selecionar_alteracao_valor(self.parcelas)
+
+            # Executar a automação com base nas entradas fornecidas
+            self.executar_automacao() 
+            
+            self.finalizar_processo()
         
-    def adicionar_categoria(self):
-        while True:
-            nome = input("\nDigite o nome da categoria (ou 0 para sair): ").strip()
-            if nome == "0":
-                print("Saindo para o menu principal...")
-                self.iniciar()
-                return
-
-            if not nome:
-                print("O nome da categoria não pode estar vazio.")
-                continue
-
-            if self.db.verificar_categoria_existente(nome):
-                print(f"A categoria '{nome}' já está cadastrada.")
-                continue
-
-            codigo = input("Digite o código da categoria (ou pressione Enter para ignorar): ").strip()
-            codigo = codigo if codigo else None
-
-            self.db.cadastrar_categoria(nome, codigo)
-            print(f"Categoria '{nome}' adicionada com sucesso!")
-            break
-
-    def adicionar_fornecedor(self):
-        while True:
-            categorias = self.db.listar_categorias()
-
-            if not categorias:
-                print("\nNenhuma categoria cadastrada. Adicione uma categoria primeiro.")
-                return
-
-            print("\nCategorias disponíveis:")
-            for categoria in categorias:
-                print(f"{categoria[0]}: {categoria[1]}")
-            print("0: Sair para o menu principal")
-
-            try:
-                categoria_id = int(input("\nDigite o ID da categoria para adicionar um fornecedor: "))
-                if categoria_id == 0:
-                    print("Saindo para o menu principal...")
-                    self.iniciar()
-                    return
-
-                categoria_selecionada = next((cat for cat in categorias if cat[0] == categoria_id), None)
-                if not categoria_selecionada:
-                    print("ID da categoria inválido. Tente novamente.")
-                    continue
-
-                print(f"\nCategoria selecionada: {categoria_selecionada[1]}")
-
-                fornecedores = self.db.obter_fornecedores_por_categoria(categoria_id)
-                if fornecedores:
-                    print(f"\nFornecedores já cadastrados na categoria '{categoria_selecionada[1]}':")
-                    for fornecedor in fornecedores:
-                        print(f"{fornecedor['id']}: {fornecedor['nome']}")
-                else:
-                    print(f"\nNenhum fornecedor encontrado na categoria '{categoria_selecionada[1]}'. Você pode adicionar um novo fornecedor.")
-
-                nome = input("\nDigite o nome do fornecedor a ser adicionado: ").strip()
-                if not nome:
-                    print("Nome do fornecedor não pode estar vazio.")
-                    continue
-
-                conn = self.db.conectar()
-                cursor = conn.cursor()
-
-                try:
-                    cursor.execute(
-                        'INSERT INTO fornecedores (nome, categoria_id) VALUES (?, ?)',
-                        (nome, categoria_id)
-                    )
-                    conn.commit()
-                    print(f"Fornecedor '{nome}' adicionado com sucesso!")
-                    break
-                except sqlite3.Error as e:
-                    print(f"Erro ao adicionar fornecedor: {e}")
-                finally:
-                    conn.close()
-
-            except ValueError:
-                print("Entrada inválida. Por favor, insira um número válido.")
-
     def selecionar_categoria(self):
-        print("\n--- Seleção de Categoria ---")
-    
-        categorias = self.db.obter_categorias()
-        if not categorias:
-            print("Nenhuma categoria cadastrada.")
-            return
-    
+        print("Selecione o tipo de lançamento:")
+        for numero, categoria in self.categorias.items():
+            print(f"{numero}: {categoria[0]}")
+
+        # Selecionar a categoria
         while True:
-            print("\nCategorias disponíveis:")
-            for categoria in categorias:
-                print(f"{categoria['id']}: {categoria['nome']}")
-            print("0: Sair para o menu principal")
-    
+            self.click_at(605, 1062)
             try:
-                escolha = int(input("Digite o número da categoria desejada: "))
-                if escolha == 0:
-                    print("Saindo para o menu principal...")
-                    self.iniciar()
-                    return
-    
-                categoria_selecionada = next((cat for cat in categorias if cat["id"] == escolha), None)
-                if categoria_selecionada:
-                    self.categoria = categoria_selecionada["nome"]
-                    self.codigo_categoria = categoria_selecionada.get("codigo")
-                    print(f"\nVocê selecionou: {self.categoria} (Código: {self.codigo_categoria or 'N/A'})")
+                self.escolha = int(input("Digite o número da categoria: "))
+                if self.escolha in self.categorias:
+                    self.categoria, self.codigo_categoria = self.categorias[self.escolha]
+                    print(f"\nVocê selecionou: {self.categoria}")
+
+                    # Exibe o código da categoria, se houver
+                    if self.codigo_categoria:
+                        print(f"Código: {self.codigo_categoria}")
+
+                    # Verifica e exibe os fornecedores da categoria selecionada
+                    if self.categoria in fornecedores:
+                        print("Fornecedores disponíveis:")
+                        for idx, fornecedor in enumerate(fornecedores[self.categoria], 1):
+                            print(f"{idx}: {fornecedor}")
+
+                        # Selecionar fornecedor
+                        while True:
+                            try:
+                                fornecedor_escolha = int(input("Digite o número do fornecedor desejado: "))
+                                if 1 <= fornecedor_escolha <= len(fornecedores[self.categoria]):
+                                    self.fornecedor = fornecedores[self.categoria][fornecedor_escolha - 1]
+                                    print(f"Fornecedor selecionado: {self.fornecedor}")
+                                    break
+                                else:
+                                    print("Opção de fornecedor inválida. Tente novamente.")
+                            except ValueError:
+                                print("Entrada inválida. Por favor, insira um número.")
+                    else:
+                        print("Nenhum fornecedor cadastrado para essa categoria.")
+
                     break
                 else:
                     print("Opção inválida. Tente novamente.")
             except ValueError:
                 print("Entrada inválida. Por favor, insira um número.")
-    
-        fornecedores = self.db.obter_fornecedores_por_categoria(categoria_selecionada["id"])
-    
-        if not fornecedores:
-            print("Nenhum fornecedor disponível para esta categoria.")
-            self.fornecedor = None
-        else:
-            while True:
-                print("\nFornecedores disponíveis:")
-                for fornecedor in fornecedores:
-                    print(f"{fornecedor['id']}: {fornecedor['nome']}")
-                print("0: Sair para o menu principal")
-    
-                try:
-                    escolha = int(input("Digite o número do fornecedor desejado: "))
-                    if escolha == 0:
-                        print("Saindo para o menu principal...")
-                        self.iniciar()
-                        return
-    
-                    fornecedor_selecionado = next(
-                        (forn for forn in fornecedores if forn["id"] == escolha), None
-                    )
-                    if fornecedor_selecionado:
-                        self.fornecedor = fornecedor_selecionado["nome"]
-                        print(f"\nVocê selecionou o fornecedor: {self.fornecedor}")
-                        break
-                    else:
-                        print("Opção inválida. Tente novamente.")
-                except ValueError:
-                    print("Entrada inválida. Por favor, insira um número.")
-                    
-            while True:
-                try:
-                    self.parcelas = int(input("Digite o número de parcelas: "))
-                    print(f"\nNúmero de parcelas selecionado: {self.parcelas}")
-                    break
-                except ValueError:
-                    print("Entrada inválida. Por favor, insira um número.")
 
+        # Solicitar o número de parcelas
+        while True:
+            try:
+                self.parcelas = int(input("Digite o número de parcelas: "))
+                break
+            except ValueError:
+                print("Entrada inválida. Por favor, insira um número.")
+           
     def selecionar_banco(self):
         while True:
             try:
@@ -258,7 +146,7 @@ class Bot(DesktopBot):
                     print("Código de banco inválido! Tente novamente.")
             except ValueError:
                 print("Entrada inválida. Tente novamente.")
-                              
+                
     def selecionar_alteracao_valor(self, parcelas):
         print("Deseja alterar o valor?")
         # Se o número de parcelas for maior que 1, oferece a opção de alterar
@@ -269,6 +157,7 @@ class Bot(DesktopBot):
                 try:
                     escolha = input("Informe: ").strip()
                     print(f"Você escolheu: '{escolha}' com código ASCII {ord(escolha)}")
+                    # Verificando se a escolha está no dicionário
                     if int(escolha) in self.alterar_valor:
                         self.escolha_alterar_valor = escolha
                         return escolha
@@ -277,89 +166,21 @@ class Bot(DesktopBot):
                 except ValueError:
                     print("Insira um número.")
         else:
+            # Caso a quantidade de parcelas seja 1, não oferece a opção de alterar valor
             print("Não é necessário alterar o valor, pois é apenas 1 parcela.")
-            self.escolha_alterar_valor = '1' 
-            return '1' 
+            self.escolha_alterar_valor = '1'  # Armazenando um valor padrão para não alterar
+            return '1'  # Retornando valor padrão
+        # Iniciar a automação
         
-    def excluir_categoria(self):
-        try:
-            # Solicitar ao usuário o ID ou comando para exclusão
-            #print("Digite o ID da categoria que deseja excluir.")
-            #print("Para excluir todas as categorias, digite '@ALL'.")
-            #print("Para excluir múltiplas categorias, insira os IDs separados por vírgula (exemplo: 1,2,3).")
-            entrada = input("Sua escolha: ").strip()
-
-            conn = sqlite3.connect('fornecedores.db')
-            cursor = conn.cursor()
-
-            if entrada == "@ALL":
-                confirmacao = input("Você tem certeza que deseja excluir TODAS as categorias? Digite 'CONFIRMAR' para prosseguir: ").strip()
-                if confirmacao == "CONFIRMAR":
-                    cursor.execute('DELETE FROM categorias')
-                    conn.commit()
-                    print("Todas as categorias foram excluídas com sucesso!")
-                else:
-                    print("Exclusão de todas as categorias cancelada.")
-            elif "," in entrada:  # Excluir múltiplas categorias
-                ids = [int(id.strip()) for id in entrada.split(",")]
-                categorias_nao_excluidas = []
-
-                for categoria_id in ids:
-                    cursor.execute('SELECT * FROM fornecedores WHERE categoria_id = ?', (categoria_id,))
-                    fornecedores = cursor.fetchall()
-
-                    if fornecedores:
-                        categorias_nao_excluidas.append(categoria_id)
-                    else:
-                        cursor.execute('DELETE FROM categorias WHERE id = ?', (categoria_id,))
-                conn.commit()
-
-                print("Categorias especificadas excluídas, exceto as seguintes com fornecedores associados:")
-                print(", ".join(map(str, categorias_nao_excluidas)) if categorias_nao_excluidas else "Nenhuma.")
-            else:  # Excluir uma única categoria
-                categoria_id = int(entrada)
-
-                cursor.execute('SELECT * FROM fornecedores WHERE categoria_id = ?', (categoria_id,))
-                fornecedores = cursor.fetchall()
-
-                if fornecedores:
-                    print("Não é possível excluir esta categoria, pois há fornecedores associados a ela.")
-                else:
-                    cursor.execute('DELETE FROM categorias WHERE id = ?', (categoria_id,))
-                    conn.commit()
-                    print(f"Categoria com ID {categoria_id} excluída com sucesso!")
-
-            # Reordenar IDs das categorias após qualquer exclusão
-            cursor.execute('SELECT id FROM categorias ORDER BY id')
-            categorias = cursor.fetchall()
-
-            # Reorganizar as IDs em ordem numérica
-            for index, (id_atual,) in enumerate(categorias, start=1):
-                cursor.execute('UPDATE categorias SET id = ? WHERE id = ?', (index, id_atual))
-            conn.commit()
-            print("IDs das categorias reordenados com sucesso.")
-            self.db.listar_categorias()
-
-        except ValueError:
-            print("Erro: Por favor, insira um número válido para o ID ou use os comandos indicados.")
-        except sqlite3.Error as e:
-            print(f"Erro ao excluir a categoria: {e}")
-        finally:
-            if 'conn' in locals() and conn:
-                conn.close()
- 
     def executar_automacao(self):
-        #self.logs()
         print("Iniciando nova iteração do loop.")
-        self.wait(2000)
+        self.wait(2000)  # Espera de 2 segundos
+        # Primeiro clique e espera de 3 segundos
         self.click_at(1003, 114)
         print("Clique realizado na posição (1003, 114).")
         self.notificar("Clique realizado", "Posição (1003, 114)")
-        self.wait(1)
-        #self.click_at(1227, 703)
         self.wait(3000)
         self.double_click_at(615,269)
-        
         if self.parcelas > 1:
             self.calculadora()
         else:
@@ -371,22 +192,10 @@ class Bot(DesktopBot):
         # Aguardar digitação de texto e Insert para a "Categoria"
         keyboard.press_and_release('tab')
         # Preenche somente o código se existir, senão preenche o nome
-        self.wait(1)
-        print(f"Valor inicial - categoria: {self.categoria}, codigo_categoria:{self.codigo_categoria}")
-        try:
-            if self.codigo_categoria:  # Verifica se o código da categoria tem um valor
-                print(f"Usando o código da categoria: {self.codigo_categoria}")
-                keyboard.write(str(self.codigo_categoria))  # Converte para string
-            elif self.categoria:  # Verifica se o nome da categoria tem um valor
-                print(f"Usando o nome da categoria: {self.categoria}")
-                keyboard.write(self.categoria)  # Escreve diretamente
-            else:
-                # Se ambos forem None ou vazios, exibe a mensagem de erro
-                print("Nenhum dado disponível para preencher a categoria.")
-        except Exception as e:
-            print(f"Erro ao preencher a categoria: {e}")
-
-
+        if self.codigo_categoria:
+            keyboard.write(self.codigo_categoria)  # Preenche só o código
+        else:
+            keyboard.write(self.categoria)  # Preenche o nome
         time.sleep(0.25)
         #self.aguardar_tecla_insert("Etapa 2")
         #print("Esperando após digitar a categoria.")
@@ -394,7 +203,14 @@ class Bot(DesktopBot):
         # Ações com Tab e setas
         self.click_at(524, 337)
         self.wait(0.2)
-        self.realizar_acao_por_categoria()
+        if self.escolha in [4, 5]:
+            for i in range(5):
+                py.press('down')
+            print("Numero detectado, opção 1")
+        else:
+            for n in range(3):
+                py.press('down')
+            print("Numero nao detectado, opção 2")
         time.sleep(0.25)
         self.click_at(825, 306)
         #self.click_at(825, 306)
@@ -411,10 +227,8 @@ class Bot(DesktopBot):
         # Continuar navegação com Tab
         self.pular_campos(3)
         print("Tecla 'Tab' pressionada após 'NFe'.")
-        # Aguardar texto do 
-        self.wait(0.50)
-        keyboard.write(str(self.fornecedor))
-        self.wait(0.50)
+        # Aguardar texto do Fornecedor
+        self.paste(str(self.fornecedor))
         self.double_click_at(1544, 538)
         #self.aguardar_tecla_insert("Etapa 5")
         print("Esperando após digitar o Fornecedor.")
@@ -424,23 +238,22 @@ class Bot(DesktopBot):
         for _ in range(3):
             keyboard.press_and_release('tab')
         print("Tecla 'Tab' pressionada após 'Fornecedor'.")
-        #self.aguardar_digitar("N° Parcelas")
         self.wait(1)
-        keyboard.write(str(self.parcelas))
-        self.wait(0.25)
+        #self.aguardar_digitar("N° Parcelas")
+        self.wait(0.10)
+        self.paste(int(self.parcelas))
+        self.wait(0.10)
         # Preencher campos e aguardar outros inputs
         keyboard.press_and_release('tab')
-        self.wait(0.25)
-        keyboard.write(str("BOLETO"))
-        self.wait(0.25)
+        self.paste("BOLETO")
         keyboard.press_and_release('tab')
-        time.sleep(0.50)
-        keyboard.write(str(self.codigo_banco))
-        time.sleep(0.50)
+        self.paste(str(self.codigo_banco))
+        # Tab e preenchimento do campo Mensal
         keyboard.press_and_release('tab')
+        print("Tecla 'Tab' após o banco.")
         self.notificar("Tecla 'Tab' pressionada", "Após o banco")
-        self.wait(0.25)
-        keyboard.write(str("Mensal"))
+        self.wait(1)
+        self.paste("Mensal")
         keyboard.press_and_release('tab')
         # Vencimento e aguardar tecla Insert
         self.aguardar_digitar("Vencimento")
@@ -450,6 +263,7 @@ class Bot(DesktopBot):
         self.pular_campos(2)
         keyboard.press_and_release('enter')
         self.selecionar_comportamento_parcelas()
+        # Comportamento baseado na quantidade de parcelas
      
     def selecionar_comportamento_parcelas(self):
         print("Selecionando comportamento para o número de parcelas...")
@@ -612,30 +426,30 @@ class Bot(DesktopBot):
         self.finalizar_processo()
     
     def finalizar_processo(self):
-        """Função para salvar e fechar o processo após preencher os campos."""
-        print("Finalizando o processo...")
-    
-        # Clique no botão 'Salvar'
-        self.click_at(1370, 625)  # Ajuste as coordenadas se necessário
-        self.wait(1)
-    
-        # Clique no botão 'Fechar'
-        self.click_at(1399, 654)  # Ajuste as coordenadas se necessário
-        self.click_at(1447, 204)  # Ajuste as coordenadas se necessário
-        if not self.dados_lancamento:
-            print("Nenhum dado para salvar.")
-            return
-        # Gera um nome de arquivo único
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        nome_arquivo = f"log_lancamentos_{timestamp}.json"
-        # Salva os dados em um arquivo JSON
-        with open(nome_arquivo, "w", encoding="utf-8") as arquivo:
-            json.dump(self.dados_lancamento, arquivo, ensure_ascii=False, indent=4)
-        print(f"Arquivo de log gerado: {nome_arquivo}")
-        self.dados_lancamento = []  # Reseta a lista após salvar
-        # Notificação de conclusão
-        self.notificar("Processo Finalizado", f"Log salvo em {nome_arquivo}")
-        print("Processo salvo e finalizado.")
+            """Função para salvar e fechar o processo após preencher os campos."""
+            print("Finalizando o processo...")
+        
+            # Clique no botão 'Salvar'
+            self.click_at(1370, 625)  # Ajuste as coordenadas se necessário
+            self.wait(1)
+        
+            # Clique no botão 'Fechar'
+            self.click_at(1399, 654)  # Ajuste as coordenadas se necessário
+            self.click_at(1447, 204)  # Ajuste as coordenadas se necessário
+        
+            print("Processo salvo e finalizado.")
+
+    def esquema_boletos(self):
+        
+        self.selecionar_categoria()
+
+        self.selecionar_banco()
+
+        self.selecionar_alteracao_valor(self.parcelas)
+         
+        self.executar_automacao() 
+              
+        self.finalizar_processo()
 
     def find_multiple_images(self, images, matching=0.97, waiting_time=10000):
         for image in images:
@@ -685,32 +499,7 @@ class Bot(DesktopBot):
                 return int(input(mensagem))
             except ValueError:
                 print("Entrada inválida. Por favor, insira um número.")
-    
-    def inicializar_dados(self, categorias, fornecedores):
-        cursor = self.conn.cursor()
-
-        # Adiciona categorias iniciais
-        for categoria in categorias:
-            cursor.execute(
-                "INSERT OR IGNORE INTO categorias (nome, codigo) VALUES (?, ?)",
-                (categoria["nome"], categoria.get("codigo")),
-            )
-
-        # Adiciona fornecedores iniciais
-        for fornecedor in fornecedores:
-            cursor.execute(
-                """
-                INSERT OR IGNORE INTO fornecedores (categoria_id, nome)
-                VALUES (
-                    (SELECT id FROM categorias WHERE nome = ?),
-                    ?
-                )
-                """,
-                (fornecedor["categoria"], fornecedor["nome"]),
-            )
-
-        self.conn.commit()
-
+        
     def comportamento_para_sim(self):
         print("Executando comportamento_para_sim")
         #Ir para N° Documento
@@ -833,96 +622,16 @@ class Bot(DesktopBot):
 
     def not_found(self, numero):
         print(f"Elemento '{numero}' não encontrado. Verifique a imagem ou a configuração.")
-
-    def logs(self):        
-        dados = {
-            "valor": None,
-            "categoria": self.categoria,
-            "NFe": None,
-            "fornecedor": self.fornecedor,
-            "parcelas": self.parcelas,
-            "metodo_pagamento": "BOLETO",
-            "banco": self.codigo_banco,
-            "periodicidade": "Mensal",
-            "vencimento": None,
-        }
-
-        # Simulação de cada etapa com coleta de dados
-        print("Preenchendo valor...")
-        valor = input("Digite o valor: ")  # Simula inserção manual
-        dados["valor"] = valor
-
-        print("Preenchendo NFe...")
-        nfe = input("Digite o número da NFe: ")  # Simula inserção manual
-        dados["NFe"] = nfe
-
-        print("Preenchendo vencimento...")
-        vencimento = input("Digite a data de vencimento (DD/MM/AAAA): ")  # Simula inserção manual
-        dados["vencimento"] = vencimento
-
-        self.dados_lancamento.append(dados)  # Adiciona os dados do lançamento atual
-
-    def lancamentos(self):
-        while True:
-            
-            self.selecionar_categoria()
-
-            self.selecionar_banco()
-
-                # Perguntar sobre alteração de valores
-            self.selecionar_alteracao_valor(self.parcelas)
-
-                # Executar automação com base nas escolhas
-            self.executar_automacao()
-
-                # Finalizar o processo
-            self.finalizar_processo()
-            print("\nIniciando novo processo de automação.")
-            self.click_at(607, 1062)
-            
-    def realizar_acao_por_categoria(self):
-        print("\n--- Realizando ações baseadas na categoria selecionada ---")
-
-        if not hasattr(self, 'codigo_categoria'):
-            print("Nenhuma categoria foi selecionada. Certifique-se de executar 'selecionar_categoria' primeiro.")
-            return
-
-        if self.codigo_categoria == ["4", "5"]:  # Use o código da categoria ou o nome, conforme sua lógica
-            for i in range(5):
-                py.press('down')
-            print("Categoria específica detectada: Opção 1 (Código 4 ou 5).")
-        else:
-            for i in range(3):
-                py.press('down')
-            print("Categoria geral detectada: Opção 2.")
-
+        
 if __name__ == "__main__":
     try:
-        # Inicializa o bot e o banco de dados
-        bot = Bot()  # Certifique-se de que a classe 'Bot' está importada corretamente
-        db = sqlite3.connect("dados.db")  # Substitua pelo nome correto do banco
-        bot.db = db
-
-        # Inicia o bot
-        bot.iniciar()
-
-        # Chamadas dos métodos do bot
-        bot.adicionar_categoria()
-        bot.adicionar_fornecedor()
-        bot.selecionar_categoria()
-        bot.selecionar_banco()
-        bot.alterar = bot.selecionar_alteracao_valor(bot.parcelas)
-        bot.executar_automacao()
-    
+        bot = Bot()
+        bot.iniciar()  # Garanta que o método correto seja chamado
     except Exception as e:
         print(f"Ocorreu um erro: {e}")
-    
-    finally:
-        # Garante que o banco de dados seja fechado corretamente
-        if 'db' in locals() and db:
-            db.close()
-            
-        
-
+    bot.selecionar_categoria()
+    bot.selecionar_banco()
+    bot.alterar = bot.selecionar_alteracao_valor(bot.parcelas)
+    bot.executar_automacao()
 
 

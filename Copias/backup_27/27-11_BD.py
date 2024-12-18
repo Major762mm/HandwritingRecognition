@@ -11,36 +11,12 @@ import logging
 
 # Criação do banco de dados e das tabelas
 
-
-categorias_iniciais = [
-
-    {"nome": "Manutençao de Veículos", "codigo": None, "fornecedores": ["DVA veiculos", "Victor dos santos", "furgoes isoppo", "Rf Comercio", "Posto de molas", "Mezaroba com", "Mecanica Rosso", "Duarte Diesel", "RF - Sul", "Obemolas", "Center Valvulas", "Scherer", "Energiluz", "Molas Lambari", "Dirlete", "Lavacao master"]},
-    {"nome": "Manutençao e Conservação Predial", "codigo": "4.2.3.19", "fornecedores": ["Madeireira u", "Oxi-genio", "dufrio", "Buachack", "Goedert LTDA", "Dominik", "Energiluz", "Rosso Materiais", "Guga gaz", "Luciano servicos", "Conexão posto"]},
-    {"nome": "Manutençao de Máquinas", "codigo": "4.2.3.28", "fornecedores": ["Heth Maquinas", "Ambiente sul", "Maxus Impl", "Videfrigo", "Frigelar", "Guga gaz", "Dufrio"]},
-    {"nome": "Peças Corretivas", "codigo": "4.2.3.17.2.1", "fornecedores": ["Scherer", "Valcanaia", "Disauto", "Atacado Diesel", "Casa do compressor", "Dva Veiculos", "center Valvulas", "Para-brisa", "P pneus", "Molas lambari", "buzetti", "Auto center", "Rex - radiadores", "Orbid S.A", "W C L Motopecas"]},
-    {"nome": "Peças Preventivas", "codigo": "4.2.3.17.1.1", "fornecedores": ["Scherer", "Valcanaia", "Disauto", "Atacado Diesel", "Casa do compressor", "Dva Veiculos", "center Valvulas", "Para-brisa", "P pneus", "Molas lambari", "buzetti", "Auto center", "Rex - radiadores", "Orbid S.A", "W C L Motopecas"]},
-    {"nome": "Combustível e Lubrificantes", "codigo": "4.2.3.21", "fornecedores": ["Agricopel comercio", "Romano Diesel", "Planalto Com", "Rudnick", "Auto posto dallabona iii", "posto 4 irmaos", "marajo", "Nac Sul", "Maucor", "Conexão posto", "Posto e Restaurante", "Ongarato"]},
-    {"nome": "Aluguéis", "codigo": "4.2.3.10", "fornecedores": ["A&B locadora", "heth maquinas", "Macromaq", "Aluga maquinas Sul"],},
-    {"nome": "Energia", "codigo": "4.2.3.11", "fornecedores": ["Celesc", "Coop de energia eletrica", "Copel Distribuição"]},
-    {"nome": "Água e Esgoto", "codigo": "4.2.3.12", "fornecedores": ["Companhia Catarinense de Águas", "Sanepar", "Semasa"]},
-    {"nome": "Material de Limpeza", "codigo": None, "fornecedores": ["Goedert LTDA", "KL industria", "Mais clean", "KL produtos", "limpel"]},
-    {"nome": "Serviços de Terceiros", "codigo": "4.2.3.20", "fornecedores": ["SBM renovadora", "A&E locadora", "Katia regina", "P4 Comunicação", "Rico lavação", "STZ Comunicação", "Hoff S.A", "P pneus serviços"]},
-    {"nome": "Taxas", "codigo": "4.2.3.23", "fornecedores": ["BSB comercio", "cento e um velocimetros"]},
-    {"nome": "Despesas com Refeitório - Matriz", "codigo": "4.2.3.37", "fornecedores": ["Camilo e tutumi", "Armazem agua", "Guga gaz", "Panificadora fazendinha", "Frutas na caixa"]},
-    {"nome": "Material de Escritório", "codigo": "4.2.3.15", "fornecedores": ["Alexandre livramento", "Multwork comercial", "Contabilista suprimentos", "Reval atacado", "SRC embalagens"]},
-    {"nome": "Despesas com Alimentação - Curitiba", "codigo": "4.2.9.15", "fornecedores": ["Camilo e tutumi", "Armazem agua", "Guga gaz", "Panificadora fazendinha", "Frutas na caixa"]},
-    {"nome": "Telefones", "codigo": "4.2.3.13", "fornecedores": ["Claro S/A", "TIM S.A", "VIVO"]},
-
-]
-
 class FornecedorDB:
     
     def __init__(self, db_name='fornecedores.db'):
         self.db_name = db_name
         self.criar_banco()
-        #self.inserir_dados_iniciais(categorias_iniciais)
-        self.reordenar_ids()
-       
+
     def conectar(self):
         """Estabelece conexão com o banco de dados."""
         db_path = os.path.abspath('fornecedores.db')
@@ -183,218 +159,47 @@ class FornecedorDB:
         conn.commit()
         conn.close()
         print(f"Fornecedor com ID {id_fornecedor} excluído com sucesso!")
-   
-    def editar_categoria(self):
-        db.listar_categorias()
-        categoria_id = int(input("Digite o ID da categoria que deseja editar: "))
 
-        # Verificar se a categoria existe
+    def editar_fornecedor(fornecedor_id, nome, cnpj, telefone, endereco, categoria_id):
         conn = sqlite3.connect('fornecedores.db')
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM categorias WHERE id = ?", (categoria_id,))
-        categoria = cursor.fetchone()
 
-        if not categoria:
-            print(f"Categoria com ID {categoria_id} não encontrada.")
-            conn.close()
-            return
-
-        # Solicitar novos valores para a categoria
-        novo_nome = input("Digite o novo nome da categoria (ou pressione Enter para manter): ") or categoria[1]
-        novo_codigo = input("Digite o novo código da categoria (ou pressione Enter para manter): ") or categoria[2]
-
-        # Atualizar a categoria
         cursor.execute('''
-        UPDATE categorias
-        SET nome = ?, codigo = ?
+        UPDATE fornecedores
+        SET nome = ?, cnpj = ?, telefone = ?, endereco = ?, categoria_id = ?
         WHERE id = ?
-        ''', (novo_nome, novo_codigo, categoria_id))
+        ''', (nome, cnpj, telefone, endereco, categoria_id, fornecedor_id))
 
         conn.commit()
-        print(f"Categoria ID {categoria_id} atualizada com sucesso!")
+        print(f"Fornecedor ID {fornecedor_id} atualizado com sucesso!")
+
         conn.close()
-
-        
-        #Uso
-        # Atualizar apenas o nome da categoria
-        #self.editar_categoria(categoria_id=1, nome="Manutencao de veiculos")
-        
-        # Atualizar apenas o código da categoria
-        #editar_categoria(categoria_id=3, codigo="12345")
-        
-        # Atualizar o nome e o código da categoria
-        #editar_categoria(categoria_id=3, nome="Outra Categoria", codigo="67890")
-
-    def editar_fornecedor(self):
-        """
-        Edita os dados de um fornecedor no banco de dados, com base na categoria selecionada.
-        """
-        # Listar as categorias disponíveis
-        categorias = db.listar_categorias()
-        if not categorias:
-            print("Nenhuma categoria encontrada. Adicione categorias antes de editar fornecedores.")
-            return
-
-        # Exibir categorias disponíveis
-        print("\nCategorias disponíveis:")
-        for categoria in categorias:
-            print(f"{categoria[0]}: {categoria[1]}")
-
-        # Solicitar a categoria desejada
-        try:
-            categoria_id = int(input("Digite o ID da categoria para filtrar os fornecedores: "))
-            categoria_selecionada = next((cat for cat in categorias if cat[0] == categoria_id), None)
-
-            if not categoria_selecionada:
-                print("Categoria não encontrada. Verifique o ID e tente novamente.")
-                return
-
-            # Listar fornecedores da categoria selecionada
-            fornecedores = db.obter_fornecedores_por_categoria(categoria_id)
-            if not fornecedores:
-                print(f"Nenhum fornecedor encontrado para a categoria '{categoria_selecionada[1]}'.")
-                return
-
-            print(f"\nFornecedores da categoria '{categoria_selecionada[1]}':")
-            for fornecedor in fornecedores:
-                print(f"{fornecedor['id']}: {fornecedor['nome']}")  # Adaptado ao formato de dicionário
-
-            # Solicitar o fornecedor a ser editado
-            fornecedor_id = int(input("Digite o ID do fornecedor que deseja editar: "))
-            fornecedor_selecionado = next((f for f in fornecedores if f["id"] == fornecedor_id), None)
-
-            if not fornecedor_selecionado:
-                print("Fornecedor não encontrado. Verifique o ID e tente novamente.")
-                return
-
-            # Solicitar novos valores
-            print(f"\nFornecedor atual: Nome='{fornecedor_selecionado['nome']}'")
-            novo_nome = input("Digite o novo nome do fornecedor (ou pressione Enter para manter): ") or fornecedor_selecionado['nome']
-
-            # Atualizar o fornecedor no banco de dados
-            with sqlite3.connect('fornecedores.db') as conn:
-                cursor = conn.cursor()
-                cursor.execute('''
-                    UPDATE fornecedores
-                    SET nome = ?, categoria_id = ?
-                    WHERE id = ?
-                ''', (novo_nome, categoria_id, fornecedor_id))
-
-                conn.commit()
-                print(f"\nFornecedor ID {fornecedor_id} atualizado com sucesso!")
-
-        except ValueError:
-            print("Entrada inválida. Por favor, insira um número válido.")
-        except sqlite3.Error as e:
-            print(f"Erro ao editar o fornecedor: {e}")
-        except Exception as e:
-            print(f"Erro inesperado: {e}")
 
     def obter_categorias(self):
         query = "SELECT id, nome, codigo FROM categorias"
-        resultados = self.executar_query(query)
+        return self.executar_query(query)
     
-        if resultados is None:
-            return []  # Retorna uma lista vazia se não houver resultados
-        else:
-            return [{"id": categoria[0], "nome": categoria[1], "codigo": categoria[2]} for categoria in resultados]
-
     def obter_fornecedores_por_categoria(self, categoria_id):
         query = "SELECT id, nome FROM fornecedores WHERE categoria_id = ?"
-        resultados = self.executar_query(query, (categoria_id,))
-        # Convertendo os resultados para uma lista de dicionários
-        fornecedores = [{"id": row[0], "nome": row[1]} for row in resultados]
-        return fornecedores
+        return self.executar_query(query, (categoria_id,))
 
-    def executar_query(self, query, params=None):
+    def executar_query(self, query, params=(), fetchone=False, fetchall=False):
         try:
-            conn = sqlite3.connect('fornecedores.db')
+            conn = self.conectar()
             cursor = conn.cursor()
-            cursor.execute(query, params or ())
-            conn.commit()
-            return cursor.fetchall()  # Retorna todos os resultados
-        except sqlite3.Error as e:
-            print(f"Erro ao executar consulta: {e}")
-            return []  # Retorna uma lista vazia em caso de erro
+            cursor.execute(query, params)
+            if fetchone:
+                resultado = cursor.fetchone()
+            elif fetchall:
+                resultado = cursor.fetchall()
+            else:
+                conn.commit()
+                resultado = None
+            return resultado
         finally:
             conn.close()
+    
 
-    def reordenar_ids(self):
-        try:
-            conn = sqlite3.connect('fornecedores.db')
-            cursor = conn.cursor()
-
-            # Criar tabela temporária com IDs automáticos
-            cursor.execute('''
-                CREATE TABLE IF NOT EXISTS temp_categorias (
-                    id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    nome TEXT NOT NULL UNIQUE,
-                    codigo TEXT
-                )
-            ''')
-
-            # Copiar dados para a tabela temporária, garantindo a ordem pela ID original
-            cursor.execute('''
-                INSERT INTO temp_categorias (nome, codigo)
-                SELECT nome, codigo FROM categorias
-                ORDER BY id  -- Ordenando pela ID original
-            ''')
-
-            # Excluir a tabela original
-            cursor.execute('DROP TABLE categorias')
-
-            # Renomear a tabela temporária para o nome original
-            cursor.execute('ALTER TABLE temp_categorias RENAME TO categorias')
-
-            conn.commit()
-            print("IDs reorganizados com sucesso.")
-
-        except sqlite3.Error as e:
-            print(f"Erro ao reorganizar IDs: {e}")
-        finally:
-            conn.close()
-
-    def inserir_dados_iniciais(self, dados):  # Responsável por alimentar o banco de dados
-        try:
-            conn = sqlite3.connect('fornecedores.db')
-            cursor = conn.cursor()
-
-            # Inserir categorias e fornecedores
-            for item in dados:
-                # Verificar se a categoria já existe pelo nome
-                cursor.execute('SELECT id FROM categorias WHERE nome = ?', (item['nome'],))
-                categoria = cursor.fetchone()
-
-                if not categoria:
-                    # Inserir categoria com nome e código
-                    cursor.execute('INSERT INTO categorias (nome, codigo) VALUES (?, ?)', (item['nome'], item['codigo']))
-                    categoria_id = cursor.lastrowid
-                else:
-                    categoria_id = categoria[0]
-
-                # Inserir fornecedores associados à categoria
-                for fornecedor in item.get('fornecedores', []):
-                    cursor.execute(
-                        'SELECT id FROM fornecedores WHERE nome = ? AND categoria_id = ?',
-                        (fornecedor, categoria_id)
-                    )
-                    fornecedor_existente = cursor.fetchone()
-                    if not fornecedor_existente:
-                        # Inserir fornecedor se não existir
-                        cursor.execute(
-                            'INSERT INTO fornecedores (nome, categoria_id) VALUES (?, ?)',
-                            (fornecedor, categoria_id)
-                        )
-
-            conn.commit()
-            print("Dados iniciais inseridos com sucesso!")
-        except sqlite3.Error as e:
-            print(f"Erro ao inserir dados iniciais: {e}")
-        finally:
-            conn.close()
-
-
-                
 if __name__ == "__main__":
     app = FornecedorDB()
     # Chame criar_banco apenas uma vez, ou verifique antes
@@ -408,10 +213,10 @@ db = FornecedorDB()
 #print("Categorias disponíveis:")
 #for categoria in categorias:
 #    print(f"ID: {categoria[0]}, Nome: {categoria[1]}")
-
-#db.listar_categorias()
+#
+db.listar_categorias()
 #db.listar_fornecedores()
-
+#
 #  Testar cadastro de fornecedor
 #db.cadastrar_fornecedor("Loja de Pecas", 1)  # Associando à categoria com ID 1
 #db.cadastrar_fornecedor("Oficina do Pedro", 1)
@@ -558,38 +363,4 @@ bancos = {
             136:	("Unicred", None),
             0:      ("Conta - Agua/Luz", None)
     } 
-
-
-
-##########################Funções desativadas####################
-#def inserir_dados_iniciais(self, dados): #responsavel por alimentar o banco de dados
-    #    try:
-    #        conn = sqlite3.connect('fornecedores.db')
-    #        cursor = conn.cursor()
-
-    #        for item in dados:
-    #            # Inserir a categoria, se não existir
-    #            cursor.execute('SELECT id FROM categorias WHERE nome = ?', (item['categoria'],))
-    #            categoria = cursor.fetchone()
-
-    #            if not categoria:
-    #                cursor.execute('INSERT INTO categorias (nome) VALUES (?)', (item['categoria'],))
-    #                categoria_id = cursor.lastrowid
-    #            else:
-    #                categoria_id = categoria[0]
-
-    #            # Inserir fornecedores associados à categoria
-    #            for fornecedor in item['fornecedores']:
-    #                cursor.execute('SELECT id FROM fornecedores WHERE nome = ? AND categoria_id = ?', (fornecedor, categoria_id))
-    #                fornecedor_existente = cursor.fetchone()
-
-    #                if not fornecedor_existente:
-    #                    cursor.execute(
-    #                        'INSERT INTO fornecedores (nome, categoria_id) VALUES (?, ?)',
-    #                        (fornecedor, categoria_id)
-    #                    )
-
-    #        conn.commit()
-    #        print("Dados iniciais inseridos com sucesso!")
-    #    except sqlite3.Error as e:
-    #            print(f"Erro ao inserir dados iniciais: {e}")
+    

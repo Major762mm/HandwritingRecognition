@@ -1,0 +1,13 @@
+[
+    {
+        "valor": "367,25",
+        "categoria": "Manutenção e Conservação Predial",
+        "NFe": "11913",
+        "fornecedor": "Litoral comercio",
+        "parcelas": 1,
+        "metodo_pagamento": "BOLETO",
+        "banco": 756,
+        "periodicidade": "Mensal",
+        "vencimento": "14/12/2024"
+    }
+]
