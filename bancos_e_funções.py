@@ -557,7 +557,8 @@ bancos = {
             124:	("WOORI BANK DO BRASIL S.A", None),
             136:	("Unicred", None),
             0:      ("Conta - Agua/Luz", None),
-            461:    ("Asaas", None)
+            461:    ("Asaas", None),
+            336:    ("C6 Bank", None),
     } 
 
 
