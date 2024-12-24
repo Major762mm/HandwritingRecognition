@@ -760,15 +760,6 @@ class Bot(DesktopBot):
             # Se nenhuma imagem for encontrada, apenas imprime uma mensagem
             print("Imagem não encontrada")
 
-            
-        if not self.find( "numero_4", matching=0.97, waiting_time=5000):
-            self.not_found("numero_4")
-        
-        if not self.find( "numero_5", matching=0.97, waiting_time=5000):
-            self.not_found("numero_5")
-        
-        if not self.find( "numero_6", matching=0.97, waiting_time=5000):
-            self.not_found("numero_6") 
         
     def comportamento_para_nao(self):
     # Não faz nenhuma alteração, apenas continua o fluxo

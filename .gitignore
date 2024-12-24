@@ -2,6 +2,7 @@
 
 !Embedding/
 !README.md
+!data
 Copias/
 fornecedores.db
 log_lancamentos_*.json

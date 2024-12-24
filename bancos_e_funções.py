@@ -559,6 +559,7 @@ bancos = {
             0:      ("Conta - Agua/Luz", None),
             461:    ("Asaas", None),
             336:    ("C6 Bank", None),
+            401:    ("Iugu IP S.A", None),
     } 
 
 

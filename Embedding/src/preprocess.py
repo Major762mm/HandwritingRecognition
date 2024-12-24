@@ -1,3 +1,4 @@
+# preprocess_simple.py
 import cv2
 import os
 import numpy as np
@@ -24,14 +25,10 @@ def preprocess_images(input_dir, output_dir):
                 # Carregar imagem em escala de cinza
                 img = cv2.imread(img_path, cv2.IMREAD_GRAYSCALE)
                 
-                # Suavização com filtro bilateral (reduzido)
-                img = cv2.bilateralFilter(img, 5, 50, 50)  # Suavização mais leve
+                # Aplicar binarização (preto e branco)
+                _, img = cv2.threshold(img, 128, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
                 
-                # Contraste adaptativo com CLAHE
-                clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-                img = clahe.apply(img)
-                
-                # Realce de nitidez
+                # Realce de nitidez (opcional para melhorar as letras)
                 kernel = np.array([[0, -1, 0],
                                    [-1, 5, -1],
                                    [0, -1, 0]])  # Kernel de nitidez
