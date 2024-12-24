@@ -21,4 +21,5 @@ temp.py
 __init__.py
 __main__.py
 medidas.txt
+venv
 !.gitignore

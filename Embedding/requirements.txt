@@ -2,6 +2,8 @@ torch
 torchvision
 transform 
 numpy
-opencv
+opencv-python
 matplotlib
 scikit-learn
+tensorflow
+keras
