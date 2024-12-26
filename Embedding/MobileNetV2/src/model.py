@@ -3,7 +3,7 @@ from tensorflow import keras
 from tensorflow.keras.applications import MobileNetV2
 from tensorflow.keras.models import Model
 import numpy as np
-import keras
+
 
 def load_mobilenet_embedding_model():
     # Carregar o MobileNetV2 pré-treinado
