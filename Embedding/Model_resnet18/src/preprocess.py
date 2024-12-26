@@ -42,6 +42,6 @@ def preprocess_images(input_dir, output_dir):
 
 # Chamada da função
 preprocess_images(
-    r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\data\raw',
-    r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\data\processed'
+    r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\Model_resnet18\data\raw',
+    r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\Model_resnet18\data\processed'
 )
