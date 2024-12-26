@@ -2,8 +2,8 @@ import os
 import cv2
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2 
-from tensorflow.keras.models import Model 
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2  # type: ignore
+from tensorflow.keras.models import Model  # type: ignore
 from sklearn.manifold import TSNE
 import plotly.express as px
 import matplotlib.pyplot as plt

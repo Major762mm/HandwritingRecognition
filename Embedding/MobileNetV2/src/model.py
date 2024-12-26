@@ -1,5 +1,4 @@
 import tensorflow as tf
-from tensorflow import keras
 from tensorflow.keras.applications import MobileNetV2 # type: ignore
 from tensorflow.keras.models import Model # type: ignore
 import numpy as np
@@ -7,7 +6,7 @@ import numpy as np
 
 def load_mobilenet_embedding_model():
     # Carregar o MobileNetV2 pré-treinado
-    base_model = MobileNetV2(weights="imagenet", include_top=False, input_shape=(128, 128, 3))
+    base_model = MobileNetV2(weights="imagenet", include_top=False, input_shape=(256, 256, 3))
     
     # Adicionar uma camada GlobalAveragePooling para embeddings
     x = base_model.output
