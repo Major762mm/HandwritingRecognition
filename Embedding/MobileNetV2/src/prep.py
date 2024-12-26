@@ -6,7 +6,7 @@ import logging
 # Configuração do logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-def preprocess_images(input_folder, output_folder, target_size=(128, 128)):
+def preprocess_images(input_folder, output_folder, target_size=(256, 256)):
     """
     Pré-processa imagens de um diretório e salva no diretório de saída, percorrendo subpastas.
 
@@ -40,12 +40,19 @@ def preprocess_images(input_folder, output_folder, target_size=(128, 128)):
                     logging.warning(f"Erro ao carregar a imagem (possivelmente corrompida ou formato não suportado): {img_path}")
                     continue
                 
+                _, img = cv2.threshold(img, 128, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
                 # Redimensionar
                 img_resized = cv2.resize(img, target_size)
                 
                 # Normalizar
                 img_normalized = img_resized / 255.0
                 images.append(img_normalized)
+                
+                # Realce de nitidez (opcional para melhorar as letras)
+                kernel = np.array([[0, -1, 0],
+                                   [-1, 5, -1],
+                                   [0, -1, 0]])  # Kernel de nitidez
+                img = cv2.filter2D(img, -1, kernel)
                 
                 # Salvar imagem pré-processada
                 relative_path = os.path.relpath(root, input_folder)
@@ -65,8 +72,8 @@ def preprocess_images(input_folder, output_folder, target_size=(128, 128)):
     return np.array(images), np.array(labels)
 
 # Caminhos de entrada e saída
-input_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\data\raw'
-output_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\data\processed'
+input_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\MobileNetV2\data\raw'
+output_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\MobileNetV2\data\processed'
 
 # Executar pré-processamento
 images, labels = preprocess_images(input_folder, output_folder)

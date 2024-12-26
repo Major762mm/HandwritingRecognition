@@ -1,7 +1,7 @@
 import tensorflow as tf
 from tensorflow import keras
-from tensorflow.keras.applications import MobileNetV2
-from tensorflow.keras.models import Model
+from tensorflow.keras.applications import MobileNetV2 # type: ignore
+from tensorflow.keras.models import Model # type: ignore
 import numpy as np
 
 

@@ -2,8 +2,8 @@ import os
 import cv2
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
-from tensorflow.keras.models import Model
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2 
+from tensorflow.keras.models import Model 
 from sklearn.manifold import TSNE
 import plotly.express as px
 import matplotlib.pyplot as plt
@@ -79,5 +79,5 @@ def main(image_folder, interactive=True):
 
 # Configurar pasta do dataset e executar
 if __name__ == "__main__":
-    image_folder = "caminho/para/seu/dataset"  # Substitua pelo caminho correto
+    image_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\MobileNetV2\data\processed'  # Substitua pelo caminho correto
     main(image_folder, interactive=True)
