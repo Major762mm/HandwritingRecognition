@@ -42,17 +42,13 @@ def fine_tune_mobilenet(model, images, labels, epochs=5):
     lb = LabelBinarizer()
     labels_one_hot = lb.fit_transform(labels)
     
-    # Congelar as camadas iniciais do modelo
-    for layer in model.layers[:-2]:  # Descongela as últimas 10 camadas
-        layer.trainable = False
-
-    # Compilar o modelo para treino
+    # Compilação e treinamento do modelo
     model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
-
-    # Treinar o modelo com seus dados
-    model.fit(images, labels_one_hot, epochs=epochs, batch_size=16)
-
-    return model
+    
+    # Treinar o modelo e capturar o histórico
+    history = model.fit(images, labels_one_hot, epochs=epochs, batch_size=16)
+    
+    return model, history
 
 # Carregar MobileNetV2 para gerar embeddings
 def load_mobilenet_embedding_model(num_classes):
@@ -97,12 +93,34 @@ def save_embeddings(embeddings, labels, file_path):
     np.savetxt(file_path + '/labels.csv', labels, delimiter=',', fmt='%s')
     print(f"Embeddings salvos em {file_path}/embeddings.npy e {file_path}/labels.csv")
 
+# Função para plotar gráficos de treinamento
+def plot_training_history(history):
+    # Plotando a perda e a precisão
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+
+    # Gráfico de perda
+    axs[0].plot(history.history['loss'], label='Perda')
+    axs[0].set_title('Perda ao Longo das Épocas')
+    axs[0].set_xlabel('Épocas')
+    axs[0].set_ylabel('Perda')
+    axs[0].legend()
+
+    # Gráfico de precisão
+    axs[1].plot(history.history['accuracy'], label='Precisão')
+    axs[1].set_title('Precisão ao Longo das Épocas')
+    axs[1].set_xlabel('Épocas')
+    axs[1].set_ylabel('Precisão')
+    axs[1].legend()
+
+    plt.tight_layout()
+    plt.show()
+
 # Função principal
 def main():
     images, labels = load_processed_images(processed_folder)
     num_classes = len(set(labels))  # Determina o número de classes únicas nos rótulos
     embedding_model = load_mobilenet_embedding_model(num_classes)
-    embedding_model = fine_tune_mobilenet(embedding_model, images, labels, epochs=10)
+    embedding_model, history = fine_tune_mobilenet(embedding_model, images, labels, epochs=10)
     embeddings = generate_embeddings(embedding_model, images)
     
     # Salvar os embeddings
@@ -110,6 +128,9 @@ def main():
     
     # Visualizar os embeddings e salvar como HTML
     visualize_embeddings_tsne(embeddings, labels, save_as_html=True)
+
+    # Plotar gráficos de treinamento
+    plot_training_history(history)
 
 if __name__ == "__main__":
     main()

@@ -1,39 +1,42 @@
-from sklearn.manifold import TSNE
+import plotly.express as px
 import matplotlib.pyplot as plt
-import numpy as np
-from sklearn.preprocessing import normalize
+from sklearn.manifold import TSNE
 
-# Carregue embeddings
-try:
-    embeddings = np.load(r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\data\embeddings\Paulo Cesar S. - Fiorino 50.npy')
-
-    # Verifique o número de amostras
-    print(f"Número de dimensões dos embeddings: {embeddings.shape}")
-    
-    # Caso seja uma única amostra, ajuste para evitar erros
-    if len(embeddings.shape) == 1:
-        embeddings = embeddings.reshape(1, -1)
-    
-    if embeddings.shape[0] <= 5:
-        print("Aviso: Número de amostras muito pequeno para t-SNE. Resultados podem não ser representativos.")
-    
-    # Normalize os embeddings
-    embeddings = normalize(embeddings, norm='l2')  # Normaliza com norma L2
-    print("Embeddings normalizados.")
-    
-    # Reduza dimensões para 2D com t-SNE
-    tsne = TSNE(n_components=2, perplexity=min(30, embeddings.shape[0] - 1), random_state=42)
+# Função para visualizar embeddings com t-SNE
+def visualize_embeddings_tsne(embeddings, labels, save_as_html=False, output_folder=None):
+    tsne = TSNE(n_components=2, perplexity=30, n_iter=5000, random_state=42)
     embeddings_2d = tsne.fit_transform(embeddings)
-    print("t-SNE concluído.")
-    
-    # Plote as dimensões reduzidas
-    plt.figure(figsize=(8, 8))
-    plt.scatter(embeddings_2d[:, 0], embeddings_2d[:, 1])
-    plt.title("t-SNE dos Embeddings")
-    plt.xlabel("Dimensão 1")
-    plt.ylabel("Dimensão 2")
-    plt.grid(True)
-    plt.show()
 
-except Exception as e:
-    print(f"Erro ao carregar ou processar os embeddings: {e}")
+    fig = px.scatter(
+        x=embeddings_2d[:, 0],
+        y=embeddings_2d[:, 1],
+        color=labels,
+        title="t-SNE dos Embeddings (Gráfico Interativo)",
+        labels={"x": "Dimensão 1", "y": "Dimensão 2", "color": "Rótulos"}
+    )
+    
+    if save_as_html:
+        output_path = f"{output_folder}/resultado_tsne.html"
+        fig.write_html(output_path)
+        print(f"Gráfico interativo salvo como '{output_path}'. Abra-o no navegador.")
+    else:
+        fig.show()
+
+# Função para plotar gráficos de treinamento
+def plot_training_history(history):
+    fig, axs = plt.subplots(1, 2, figsize=(12, 4))
+
+    axs[0].plot(history.history['loss'], label='Perda')
+    axs[0].set_title('Perda ao Longo das Épocas')
+    axs[0].set_xlabel('Épocas')
+    axs[0].set_ylabel('Perda')
+    axs[0].legend()
+
+    axs[1].plot(history.history['accuracy'], label='Precisão')
+    axs[1].set_title('Precisão ao Longo das Épocas')
+    axs[1].set_xlabel('Épocas')
+    axs[1].set_ylabel('Precisão')
+    axs[1].legend()
+
+    plt.tight_layout()
+    plt.show()
