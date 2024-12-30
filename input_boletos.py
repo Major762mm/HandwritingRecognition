@@ -357,7 +357,6 @@ class Bot(DesktopBot):
         self.wait(2000)
         self.click_at(1003, 114)
         print("Clique realizado na posição (1003, 114).")
-        self.notificar("Clique realizado", "Posição (1003, 114)")
         self.wait(1)
         #self.click_at(1227, 703)
         self.wait(3000)
@@ -376,7 +375,6 @@ class Bot(DesktopBot):
         #self.logs("finalizar")
         #listener.stop()
         print("Esperando após digitar o Valor.")
-        #self.notificar("Esperando", "Após digitar o valor")
         # Aguardar digitação de texto e Insert para a "Categoria"
         keyboard.press_and_release('tab')
         # Preenche somente o código se existir, senão preenche o nome
@@ -399,7 +397,6 @@ class Bot(DesktopBot):
         time.sleep(0.25)
         #self.aguardar_tecla_insert("Etapa 2")
         #print("Esperando após digitar a categoria.")
-        #self.notificar("Esperando", "Após digitar o categoria")
         # Ações com Tab e setas
         self.click_at(524, 337)
         self.wait(0.2)
@@ -417,7 +414,6 @@ class Bot(DesktopBot):
         self.aguardar_tecla_insert("Etapa 4")
         #self.logs()
         print("Esperando após digitar a NFe.")
-        self.notificar("Esperando", "Após digitar o NFe")
         # Continuar navegação com Tab
         self.pular_campos(3)
         print("Tecla 'Tab' pressionada após 'NFe'.")
@@ -429,7 +425,6 @@ class Bot(DesktopBot):
         #self.logs()
         #self.aguardar_tecla_insert("Etapa 5")
         print("Esperando após digitar o Fornecedor.")
-        self.notificar("Esperando", "Após digitar o Fornecedor")
         self.wait(0.50)
         # Tab para pular campos e depois inserir número de parcelas
         for _ in range(3):
@@ -449,7 +444,6 @@ class Bot(DesktopBot):
         keyboard.write(str(self.codigo_banco))
         time.sleep(0.50)
         keyboard.press_and_release('tab')
-        self.notificar("Tecla 'Tab' pressionada", "Após o banco")
         self.wait(0.25)
         keyboard.write(str("Mensal"))
         keyboard.press_and_release('tab')
@@ -458,7 +452,6 @@ class Bot(DesktopBot):
         self.aguardar_tecla_insert("Etapa 8")
         #self.logs()
         print("Esperando após digitar o Vencimento.")
-        self.notificar("Esperando", "Após digitar o Vencimento")
         self.pular_campos(2)
         keyboard.press_and_release('enter')
         self.selecionar_comportamento_parcelas()
@@ -487,14 +480,12 @@ class Bot(DesktopBot):
         self.aguardar_digitar("N° Fatura")
         self.aguardar_tecla_insert("Etapa 8-1")
         print("Esperando após digitar a N° Fatura.")
-        self.notificar("Esperando", "Após digitar o N° Fatura")
         keyboard.press_and_release('tab')
             
         self.double_click_at(1320, 738)
         self.aguardar_digitar("Data")
         self.aguardar_tecla_insert("Etapa 8-1")
         print("Esperando após digitar a Data.")
-        self.notificar("Esperando", "Após digitar a Data")
     
         # **Novo código: Fechar e salvar após digitar a Data**
         self.finalizar_processo()
@@ -517,7 +508,7 @@ class Bot(DesktopBot):
         self.aguardar_digitar("N° Fatura")
         self.aguardar_tecla_insert("Etapa 8-2")
         print("Esperando após digitar a N° Fatura.")
-        self.notificar("Esperando", "Após digitar o N° Fatura")
+        
         
         self.double_click_at(1452, 716) #Clique fora da tela
         self.double_click_at(1151, 735) 
@@ -569,7 +560,6 @@ class Bot(DesktopBot):
         self.aguardar_digitar("N° Fatura")
         self.aguardar_tecla_insert("Etapa 8-2")
         print("Esperando após digitar a N° Fatura.")
-        self.notificar("Esperando", "Após digitar o N° Fatura")
         
         self.double_click_at(1452, 716)
         self.double_click_at(1151, 735) # Fatura 1
@@ -646,7 +636,6 @@ class Bot(DesktopBot):
         print(f"Arquivo de log gerado: {nome_arquivo}")
         self.dados_lancamento = []  # Reseta a lista após salvar
         # Notificação de conclusão
-        self.notificar("Processo Finalizado", f"Log salvo em {nome_arquivo}")
         print("Processo salvo e finalizado.")
 
     def find_multiple_images(self, images, matching=0.97, waiting_time=10000):
@@ -759,8 +748,7 @@ class Bot(DesktopBot):
         else:
             # Se nenhuma imagem for encontrada, apenas imprime uma mensagem
             print("Imagem não encontrada")
-
-        
+   
     def comportamento_para_nao(self):
     # Não faz nenhuma alteração, apenas continua o fluxo
         print("Nenhuma alteração de valor necessária.")
@@ -781,7 +769,6 @@ class Bot(DesktopBot):
                         if not self.reiniciar_solicitado:
                             self.reiniciar_solicitado = True
                             print("Tecla 'Q' pressionada por 3 segundos. Reiniciando o script...")
-                            self.notificar("Reiniciando", "Tecla 'Q' pressionada por 3 segundos")
                         return
 
             if keyboard.is_pressed('esc'):
@@ -790,49 +777,35 @@ class Bot(DesktopBot):
                     if time.time() - start_time >= 2:
                         self.click_at(1447, 204)
                         print("Tecla 'ESC' pressionada por 5 segundos. Encerrando o script...")
-                        self.notificar("Encerrando", "Tecla 'ESC' pressionada por 2 segundos")
                         os._exit(0)
 
             time.sleep(0.1)
 
     def aguardar_tecla_insert(self, etapa):
         print(f"Aguardando a tecla Insert ({etapa})...")
-        self.notificar("Aguardando", f"A tecla Insert ({etapa})")
         while True:
             event = keyboard.read_event()
             if event.event_type == keyboard.KEY_DOWN and event.name == 'insert':
                 print(f"Tecla Insert pressionada ({etapa}).")
-                self.notificar("Tecla Insert pressionada", etapa)
                 break
             self.wait(0.1)
 
     def aguardar_digitar(self, campo):
         print(f"Aguardando inserção de texto no campo {campo}...")
-        self.notificar("Aguardando", f"Inserção de texto no campo {campo}")
         while True:
             if keyboard.read_event().name.isnumeric():
                 print(f"Texto inserido no campo {campo}.")
-                self.notificar("Texto inserido", campo)
                 break
             self.wait(0.1)
 
     def aguardar_digitar_texto(self, campo):
         print(f"Aguardando inserção de texto no campo {campo}...")
-        self.notificar("Aguardando", f"Inserção de texto no campo {campo}")
         while True:
             event = keyboard.read_event()
             if event.event_type == keyboard.KEY_DOWN and (event.name.isalnum() or event.name in ['space', 'enter', 'backspace', 'tab', 'shift']):
                 print(f"Texto inserido no campo {campo}.")
-                self.notificar("Texto inserido", campo)
                 break
             self.wait(0.1)
-     
-    def notificar(self, titulo, mensagem):
-        notification.notify(
-            title=titulo,
-            message=mensagem,
-            timeout=2
-        )
 
     def not_found(self, numero):
         print(f"Elemento '{numero}' não encontrado. Verifique a imagem ou a configuração.")

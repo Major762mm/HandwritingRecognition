@@ -2,11 +2,14 @@ import os
 import cv2
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2
-from tensorflow.keras.models import Model
+from tensorflow.keras.applications.mobilenet_v2 import MobileNetV2 # type: ignore
+from tensorflow.keras.models import Model # type: ignore
 from sklearn.manifold import TSNE
 import plotly.express as px
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelBinarizer
+
+os.environ["TF_USE_LEGACY_KERAS"] = "1"
 
 # Diretórios
 processed_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\MobileNetV2\data\processed'
@@ -33,44 +36,60 @@ def load_processed_images(image_folder, target_size=(256, 256)):
     print(f"Número total de imagens carregadas: {len(images)}")  # Print para verificar o número de imagens
     return np.array(images), np.array(labels)
 
+# Ajuste fino da MobileNetV2
+def fine_tune_mobilenet(model, images, labels, epochs=5):
+    # Transformar rótulos em one-hot encoding
+    lb = LabelBinarizer()
+    labels_one_hot = lb.fit_transform(labels)
+    
+    # Congelar as camadas iniciais do modelo
+    for layer in model.layers[:-2]:  # Descongela as últimas 10 camadas
+        layer.trainable = False
+
+    # Compilar o modelo para treino
+    model.compile(optimizer='adam', loss='categorical_crossentropy', metrics=['accuracy'])
+
+    # Treinar o modelo com seus dados
+    model.fit(images, labels_one_hot, epochs=epochs, batch_size=16)
+
+    return model
+
 # Carregar MobileNetV2 para gerar embeddings
-def load_mobilenet_embedding_model():
+def load_mobilenet_embedding_model(num_classes):
     base_model = MobileNetV2(weights="imagenet", include_top=False, input_shape=(256, 256, 3))
     x = base_model.output
     x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    embedding_model = Model(inputs=base_model.input, outputs=x)
+    x = tf.keras.layers.Dense(512, activation='relu')(x)  # Opcional: adicionar uma camada intermediária
+    output = tf.keras.layers.Dense(num_classes, activation='softmax')(x)  # Saída para classificação
+    embedding_model = Model(inputs=base_model.input, outputs=output)
     return embedding_model
+
 
 # Gerar embeddings
 def generate_embeddings(model, images):
-    # As imagens já estão na forma correta, não precisamos expandir ou repetir
     embeddings = model.predict(images)  # Passar diretamente as imagens
     return embeddings
 
 # Visualizar embeddings com t-SNE
-def visualize_embeddings_tsne(embeddings, labels, interactive=False):
-    tsne = TSNE(n_components=2, perplexity=30, max_iter=5000, random_state=42)  # Atualizado para max_iter
+def visualize_embeddings_tsne(embeddings, labels, save_as_html=False):
+    tsne = TSNE(n_components=2, perplexity=30, n_iter=5000, random_state=42)  # Atualizado para n_iter
     embeddings_2d = tsne.fit_transform(embeddings)
+
+    # Gráfico interativo com Plotly
+    fig = px.scatter(
+        x=embeddings_2d[:, 0],
+        y=embeddings_2d[:, 1],
+        color=labels,
+        title="t-SNE dos Embeddings (Gráfico Interativo)",
+        labels={"x": "Dimensão 1", "y": "Dimensão 2", "color": "Rótulos"}
+    )
     
-    if interactive:
-        # Gráfico interativo com Plotly
-        fig = px.scatter(
-            x=embeddings_2d[:, 0],
-            y=embeddings_2d[:, 1],
-            color=labels,
-            title="t-SNE dos Embeddings (Gráfico Interativo)",
-            labels={"x": "Dimensão 1", "y": "Dimensão 2", "color": "Rótulos"}
-        )
-        fig.show()
+    if save_as_html:
+        output_path = os.path.join(embedding_folder, "resultado_tsne.html")
+        fig.write_html(output_path)
+        print(f"Gráfico interativo salvo como '{output_path}'. Abra-o no navegador.")
     else:
-        # Gráfico estático com Matplotlib
-        plt.figure(figsize=(10, 8))
-        scatter = plt .scatter(embeddings_2d[:, 0], embeddings_2d[:, 1], c=labels, cmap="tab10")
-        plt.colorbar(scatter)
-        plt.title("t-SNE dos Embeddings")
-        plt.xlabel("Dimensão 1")
-        plt.ylabel("Dimensão 2")
-        plt.show()
+        fig.show()
 
 # Salvar embeddings em um arquivo
 def save_embeddings(embeddings, labels, file_path):
@@ -81,14 +100,16 @@ def save_embeddings(embeddings, labels, file_path):
 # Função principal
 def main():
     images, labels = load_processed_images(processed_folder)
-    embedding_model = load_mobilenet_embedding_model()
+    num_classes = len(set(labels))  # Determina o número de classes únicas nos rótulos
+    embedding_model = load_mobilenet_embedding_model(num_classes)
+    embedding_model = fine_tune_mobilenet(embedding_model, images, labels, epochs=10)
     embeddings = generate_embeddings(embedding_model, images)
     
     # Salvar os embeddings
     save_embeddings(embeddings, labels, embedding_folder)
     
-    # Visualizar os embeddings
-    visualize_embeddings_tsne(embeddings, labels, interactive=True)
+    # Visualizar os embeddings e salvar como HTML
+    visualize_embeddings_tsne(embeddings, labels, save_as_html=True)
 
 if __name__ == "__main__":
     main()
