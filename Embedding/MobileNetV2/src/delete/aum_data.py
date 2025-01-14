@@ -64,8 +64,8 @@ def augment_dataset(input_folder, output_folder, augmentations, augment_count=5)
 
 if __name__ == "__main__":
     # Caminhos
-    input_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\MobileNetV2\data\processed'
-    output_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\MobileNetV2\data\augmentation'
+    input_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\MobileNetV2\data\processed\motoristas\Paulo Cesar S. - Fiorino 50'
+    output_folder = r'C:\Users\rafael.jose\OneDrive\Documentos\ProjetoBotCity\BotAutom\BotAutom\Embedding\MobileNetV2\data\augmentation\Paulo Cesar S. - Fiorino 50'
 
     # Definir transformações
     augmentations = Compose([

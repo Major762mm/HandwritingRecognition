@@ -27,7 +27,8 @@ def load_split_images(split_folder, target_size=(256, 256)):
                 img_normalized = img_resized / 255.0
                 images.append(img_normalized)
                 labels.append(label)
-    
+                print(f"Imagem carregada: {img_path}, Rótulo: {label}")
+                
     print(f"Número total de imagens carregadas: {len(images)}")
     labels_one_hot = label_binarizer.transform(labels)
     return np.array(images), labels_one_hot

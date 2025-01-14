@@ -2,7 +2,7 @@ import os
 from utils import load_split_images, save_embeddings
 from model import load_mobilenet_embedding_model
 from embedding import generate_embeddings
-from Embedding.MobileNetV2.src.delete.visul_emb import visualize_embeddings_tsne, plot_training_history
+from visul_emb import visualize_embeddings_tsne, plot_training_history
 import tensorflow as tf
 
 # Diretórios
@@ -31,9 +31,16 @@ def main():
     train_data = load_split_images(os.path.join(split_folder, 'train'))
     val_data = load_split_images(os.path.join(split_folder, 'val'))
     test_data = load_split_images(os.path.join(split_folder, 'test'))
-    num_classes = len(set(train_data[1]))  # Número de classes
+    # Calcular o número de classes
+    num_classes = len(set(map(tuple, train_data[1])))
+    from collections import Counter
+    import numpy as np
+    
+    print("Distribuição das classes no conjunto de treinamento:")
+    print(Counter(np.argmax(train_data[1], axis=1)))
 
-    print(f"Número de classes: {num_classes}")
+    print(train_data[1][:50])  # Mostra os primeiros 5 rótulos
+
 
     # Verificar se o modelo ajustado já existe
     if os.path.exists(model_save_path):
@@ -60,6 +67,7 @@ def main():
     save_embeddings(embeddings, test_labels, embedding_folder)
 
     # Visualizar embeddings com t-SNE e salvar
+    # Converter rótulos do formato one-hot para valores únicos
     visualize_embeddings_tsne(embeddings, test_labels, save_as_html=True, output_folder=embedding_folder)
 
 if __name__ == "__main__":

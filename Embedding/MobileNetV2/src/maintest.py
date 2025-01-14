@@ -2,7 +2,7 @@ import os
 import cv2
 import numpy as np
 import tensorflow as tf
-from tensorflow.keras.models import load_model  # type: ignore
+from tensorflow.keras.models import load_model # type: ignore
 from sklearn.metrics.pairwise import cosine_similarity
 
 # Configuração para compatibilidade com versões específicas do TensorFlow
@@ -72,7 +72,7 @@ def test_single_image():
     embeddings, labels = load_saved_embeddings(embedding_folder)
 
     # Procurar imagem de teste na pasta
-    test_images = [f for f in os.listdir(test_image_folder) if f.endswith(('.png', '.jpeg', '.jpg'))]
+    test_images = [f for f in os.listdir(test_image_folder) if f.lower().endswith(('.png', '.jpeg', '.jpg'))]
     if not test_images:
         print("Nenhuma imagem de teste encontrada na pasta.")
         return
