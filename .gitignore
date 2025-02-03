@@ -3,26 +3,4 @@
 !Embedding/
 !README.md
 data
-Copias/
-fornecedores.db
-log_lancamentos_*.json
-__pycache__/
-resources/
-scripts_usaveis/
-temp1/
-aaaaaaaa.py
-abastecimento.py
-coordenadas.py
-fornecedores.db
-FROTAS_PATRIMONIO (1).xlsx
-medidas.py
-relatorio.txt
-temp.py
-__init__.py
-__main__.py
-medidas.txt
 venv
-!.gitignore
-scp
-dados.db
-temporario.py

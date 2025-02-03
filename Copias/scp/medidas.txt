@@ -1,0 +1,41 @@
+Pavan 3/4 = 2.15 x 2.20 x 6.20
+Pavan Truck = 2.50 x 2.45 x 8.35
+
+Argi: 1.90 x 2.10 x 5.10
+Argi: 1.90 x 2.10 x 6.20
+Argi: 2.05 x 2.15 x 5.10
+Argi: 2.10 x 2.15 x 5.10
+Argi: 2.10 x 2.25 x 6.10
+
+
+            Case "190x210x510"
+                modelo = "ARGI_1.90X2.10X5.10"
+            Case "190x210x620"
+                modelo = "ARGI_1.90X2.10X6.20"
+            Case "205x215x615"
+                modelo = "ARGI_2.05X2.15X6.15"
+            Case "210x215x510"
+                modelo = "ARGI_2.10X2.15X5.10"
+            Case "210x225x610"
+                modelo = "ARGI_2.10X2.25X6.10"
+            Case "215x220x620"
+                modelo = "PAVAN_2.15X2.20X6.20"
+            Case "175x195x350"
+                modelo = "ARGI_1.75X1.95X3.50"
+            Case "200x205x420"
+                modelo = "ARGI_2.00X2.05X4.20"
+            Case "235x245x820"
+                modelo = "ARGI_2.35X2.45X8.20"
+            Case "250x245x835"
+                modelo = "PAVAN_2.50X2.45X8.35"
+            Case "250x245x1140"
+                modelo = "SEMI REBOQUE_IBIPORÃ"
+            Case "260x245x1460"
+               modelo = "SEMI REBOQUE_NIJU"
+            C ase "250x245x1440"
+                modelo = "SEMI REBOQUE_RANDON"
+            Case "240x245x1450"
+                modelo = "SEMI REBOQUE_RECRUSUL"
+            Case "245x245x1450"
+                modelo = "SEMI REBOQUE_THERMOSUL"
+            Case Else
