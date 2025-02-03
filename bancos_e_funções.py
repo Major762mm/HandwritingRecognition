@@ -560,6 +560,10 @@ bancos = {
             461:    ("Asaas", None),
             336:    ("C6 Bank", None),
             401:    ("Iugu IP S.A", None),
+            197:    ("Stone", None),
+            260:    ("Nubank", None),
+            133:    ("Cresol", None),
+            
     } 
 
 

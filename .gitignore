@@ -2,7 +2,7 @@
 
 !Embedding/
 !README.md
-!data
+data
 Copias/
 fornecedores.db
 log_lancamentos_*.json
@@ -14,7 +14,7 @@ aaaaaaaa.py
 abastecimento.py
 coordenadas.py
 fornecedores.db
-Frotas (1).xlsx
+FROTAS_PATRIMONIO (1).xlsx
 medidas.py
 relatorio.txt
 temp.py
@@ -24,3 +24,5 @@ medidas.txt
 venv
 !.gitignore
 scp
+dados.db
+temporario.py

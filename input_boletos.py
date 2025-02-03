@@ -62,7 +62,7 @@ class Bot(DesktopBot):
             print("1: Adicionar Categoria")
             print("2: Adicionar Fornecedor")
             print("3: Fazer lançamento")
-            print("4: Esquema com boletos")
+            print("4: Excluir fornecedor")
             print("5: Excluir categoria")
             print("6: Listar categorias")
             print("7: Listar fornecedores")
@@ -79,7 +79,7 @@ class Bot(DesktopBot):
             elif escolha == "3":
                 self.lancamentos()
             elif escolha == "4":
-                print("Sem função...")
+                self.db.excluir_fornecedor()
             elif escolha == "5":
                 self.excluir_categoria()
             elif escolha == "6":
@@ -870,18 +870,22 @@ class Bot(DesktopBot):
     def realizar_acao_por_categoria(self):
         print("\n--- Realizando ações baseadas na categoria selecionada ---")
 
-        if not hasattr(self, 'codigo_categoria'):
-            print("Nenhuma categoria foi selecionada. Certifique-se de executar 'selecionar_categoria' primeiro.")
-            return
-
-        if self.codigo_categoria == ["4", "5"]:  # Use o código da categoria ou o nome, conforme sua lógica
+        # Verifica se a ID da categoria é 4 ou 5
+        # Verifica se o código completo corresponde à categoria Peças Corretivas
+        if self.codigo_categoria == "4.2.3.17.2.1":  # Código completo da categoria Peças Corretivas
             for i in range(5):
                 py.press('down')
-            print("Categoria específica detectada: Opção 1 (Código 4 ou 5).")
+            print("Categoria Peças Corretivas detectada (Código completo 4.2.3.17.2.1).")
+        elif self.codigo_categoria == "5.2.3.17.2.1":  # Código completo para Peças Preventivas, por exemplo
+            for i in range(5):
+                py.press('down')
+            print("Categoria Peças Preventivas detectada (Código completo 5.2.3.17.2.1).")
         else:
             for i in range(3):
                 py.press('down')
-            print("Categoria geral detectada: Opção 2.")
+            print("Categoria geral detectada.")
+
+
 
 if __name__ == "__main__":
     try:
